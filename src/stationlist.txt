@@ -4,3 +4,4 @@ WTRX/AM/133/Flint/sports
 WUGN/FM/997/Midland/religious
 WWJ/AM/95/Detroit/news
 WKCQ/FM/981/Saginaw/country
+WJR/FM/764/Chicago/hip-hop

@@ -25,7 +25,7 @@ public class Prog1 {
 		Database inputDatabase = null; //database created based on inputed file
 		try {
 			inputDatabase = new Database(inputFile);
-		} catch (FileNotFoundException caughtException) {
+		} catch (FileNotFoundException e) {
 			System.out.println("File not at file name location");
 			System.exit(0);
 		}
@@ -33,32 +33,21 @@ public class Prog1 {
 		String userInput; //string based on input from Scanner in
 		//begins printing lines for user input
 		System.out.println("Welcome to the CS-102 Radio Station Database Program!");
-		final String SEARCH_CALLSIGN = "1";
-		final String SEARCH_FREQUENCY = "2";
-		final String SEARCH_FORMAT = "3";
-		final String PRINT_ALL = "4";
-		final String ADD_STATION = "5";
-		final String EXIT = "9";
-		String band;  //String that holds inputed frequency band
 		while ( true ){
-			System.out.println("\nCurrent available commands:\n"
-					+ "1 --> Search for a call sign\n"
-					+ "2 --> Search for a frequency\n"
-					+ "3 --> Search for a format\n"
-					+ "4 --> Print all records\n"
-					+ "5 --> Add a station\n"
-					+ "9 --> Exit\n\nYour choice?");
+			System.out.println("\nCurrent available commands:\n1 --> Search for a call sign\n"
+			+ "2 --> Search for a frequency\n3 --> Search for a format\n"
+			+ "4 --> Print all records\n9 --> Exit\n\nYour choice?");
 			//checks for user input
 			userInput = in.next();
 			//depending on input entered, calls method to complete function
 			switch (userInput){
-			case SEARCH_CALLSIGN:
+			case "1":
 				System.out.println("Enter call sign:");
 				inputDatabase.callSignSearch(in.next());
 			break;
-			case SEARCH_FREQUENCY:
+			case "2":
 				System.out.println("Enter frequency band:");
-				band = in.next();
+				String band = in.next(); //String that holds inputed frequency band
 				try{
 					//checks band type to determine which type to call for
 					if (band.equalsIgnoreCase("FM")){
@@ -68,64 +57,19 @@ public class Prog1 {
 					else if (band.equalsIgnoreCase("AM")){
 						System.out.println("Enter frequency:");
 						inputDatabase.frequencySearch(in.nextInt(), "AM");
-					} else {
-						System.out.println("Invalid band.");
-						throw new InputMismatchException();
-					}
-				} catch (InputMismatchException caughtException){
+					} else System.out.println("Invalid band.");
+				} catch (InputMismatchException e){
 					System.out.println("Incorrect input.");
 				}
 			break;
-			case SEARCH_FORMAT:
+			case "3":
 				System.out.println("Enter format keyword:");
 				inputDatabase.formatSearch(in.next());
 			break;
-			case PRINT_ALL:
+			case "4":
 				inputDatabase.printAll();
 			break;
-			case ADD_STATION:
-				try{
-				System.out.println("Enter call sign:");
-				String callSign = in.next();
-					if (callSign.length() > 4){
-						System.out.println("Callsign is too long.");
-						throw new InputMismatchException();
-					}
-					else if (callSign.length() < 3){
-						System.out.println("Callsign is too short.");
-						throw new InputMismatchException();
-					}
-					System.out.println("Enter frequency band:");
-					band = in.next();
-					if (!(band.equalsIgnoreCase("FM") ||  band.equalsIgnoreCase("AM"))){
-						System.out.println("Invalid band.");
-						throw new InputMismatchException();
-					} 
-					else if (inputDatabase.checkCallSignDuplicate(callSign, band)){
-						System.out.println("Duplicate callsign in " + band.toUpperCase()
-												+ " band.");
-					}
-					System.out.println("Enter frequency:");
-					Number frequency;
-					try{
-						if (band.equalsIgnoreCase("FM"))
-							frequency = in.nextDouble();
-						else
-							frequency = in.nextInt();
-					} catch (InputMismatchException caughtException) {
-						System.out.println("Invalid frequency format.");
-						throw caughtException;
-					}
-					System.out.println("Enter home:");
-					String home = in.next();
-					System.out.println("Enter format:");
-					String format = in.next();
-					inputDatabase.addStation(callSign, band, frequency, home, format);
-				} catch (InputMismatchException caughtException){
-					System.out.print(" Returning to menu.");
-				}
-			break;
-			case EXIT:
+			case "9":
 				//terminates the program is 9 is entered
 				System.exit(0);
 			break;
@@ -134,6 +78,7 @@ public class Prog1 {
 				//prints error message and returns to top
 				System.out.println("Not a correct command.");
 			}
+			
 		}
 	}
 }
