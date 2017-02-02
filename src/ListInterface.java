@@ -1,3 +1,11 @@
+/***************************************************************************************/
+/* Jacob Austin                                                           		       */
+/* Login ID: aust8558                                                     		       */ 
+/* CS-102, Winter 2017                                                    		       */
+/* Programming Assignment 1                                               		       */
+/* List interface: methods for all list classes                                */
+/***************************************************************************************/
+
 public interface ListInterface {
 	public boolean isEmpty();
 	public int size();

@@ -3,13 +3,13 @@
 /* Login ID: aust8558                                                     */ 
 /* CS-102, Winter 2017                                                    */
 /* Programming Assignment 1                                               */
-/* Prog1 class: obtains input file and passes it on to Database class     */
+/* Prog2 class: obtains input file and passes it on to Database class     */
 /**************************************************************************/
 
 import java.io.*;
 import java.util.*;
 
-public class Prog1 {
+public class Prog2 {
 	
 	/**************************************************************/ 
 	/* Method: main									  
@@ -20,24 +20,35 @@ public class Prog1 {
 	/* Returns: none							  
 	/**************************************************************/
 	public static void main(String [] args){
-		String inputFileName = args[0]; //name of file from arg[1]
-		File inputFile = new File(inputFileName); //file retrieved based on inputFileName
-		Database inputDatabase = null; //database created based on inputed file
+		//name of file from arg[1]
+		String inputFileName = args[0];
+		 //file retrieved based on inputFileName
+		File inputFile = new File(inputFileName);
+		//database created based on inputed file
+		Database inputDatabase = null; 
 		try {
 			inputDatabase = new Database(inputFile);
 		} catch (FileNotFoundException caughtException) {
 			System.out.println("File not at file name location");
 			System.exit(0);
 		}
-		Scanner in = new Scanner(System.in); //scanner for keyboard input
-		String userInput; //string based on input from Scanner in
+		//scanner for keyboard input
+		Scanner in = new Scanner(System.in);
+		//string based on input from Scanner in
+		String userInput; 
 		//begins printing lines for user input
 		System.out.println("Welcome to the CS-102 Radio Station Database Program!");
+		//constant for case to search the callsign
 		final String SEARCH_CALLSIGN = "1";
+		//constant for case to search the frequency
 		final String SEARCH_FREQUENCY = "2";
+		//constant for case to search the format
 		final String SEARCH_FORMAT = "3";
+		//constant for case to print all stations
 		final String PRINT_ALL = "4";
+		//constant for case to add a new station
 		final String ADD_STATION = "5";
+		//constant for case to exit the application
 		final String EXIT = "9";
 		String band;  //String that holds inputed frequency band
 		while ( true ){
@@ -86,7 +97,9 @@ public class Prog1 {
 			case ADD_STATION:
 				try{
 				System.out.println("Enter call sign:");
+				//callsign used in new station from user input
 				String callSign = in.next();
+					//error checking on callsign length
 					if (callSign.length() > 4){
 						System.out.println("Callsign is too long.");
 						throw new InputMismatchException();
@@ -96,32 +109,41 @@ public class Prog1 {
 						throw new InputMismatchException();
 					}
 					System.out.println("Enter frequency band:");
+					//band used in new station from user input
 					band = in.next();
+					//error checking to make sure band is FM or AM
 					if (!(band.equalsIgnoreCase("FM") ||  band.equalsIgnoreCase("AM"))){
 						System.out.println("Invalid band.");
 						throw new InputMismatchException();
 					} 
+					//error checking to make sure the callsign isn't a duplicate
 					else if (inputDatabase.checkCallSignDuplicate(callSign, band)){
 						System.out.println("Duplicate callsign in " + band.toUpperCase()
 												+ " band.");
 					}
 					System.out.println("Enter frequency:");
+					//frequency used in new station from user input
 					Number frequency;
+					//grabs frequency as double or int based on band
 					try{
 						if (band.equalsIgnoreCase("FM"))
 							frequency = in.nextDouble();
 						else
 							frequency = in.nextInt();
 					} catch (InputMismatchException caughtException) {
+						//throws an error is frequency is not an int or double
 						System.out.println("Invalid frequency format.");
 						throw caughtException;
 					}
 					System.out.println("Enter home:");
+					//home used in new station from user input
 					String home = in.next();
 					System.out.println("Enter format:");
+					//format used in new station from user input
 					String format = in.next();
 					inputDatabase.addStation(callSign, band, frequency, home, format);
 				} catch (InputMismatchException caughtException){
+					//any thrown errors will return you to the menu
 					System.out.print(" Returning to menu.");
 				}
 			break;
