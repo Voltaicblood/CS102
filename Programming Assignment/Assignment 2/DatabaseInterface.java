@@ -2,7 +2,7 @@
 /* Jacob Austin                                                           		       */
 /* Login ID: aust8558                                                     		       */ 
 /* CS-102, Winter 2017                                                    		       */
-/* Programming Assignment 3                                               		       */
+/* Programming Assignment 1                                               		       */
 /* Database interface: methods for all database classes                                */
 /***************************************************************************************/
 

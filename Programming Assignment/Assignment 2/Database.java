@@ -2,7 +2,7 @@
 /* Jacob Austin                                                           		   */
 /* Login ID: aust8558                                                     		   */ 
 /* CS-102, Winter 2017                                                    		   */
-/* Programming Assignment 3                                               		   */
+/* Programming Assignment 1                                               		   */
 /* Database class: reads and manipulates a Linked Lists containing station objects */
 /***********************************************************************************/
 
@@ -13,17 +13,13 @@ import java.io.*;
 public class Database implements DatabaseInterface {
 	
 	//list of used to store FM stations
-	private LinkedList<Station> fmList = new LinkedList<Station>(); 
+	private LinkedList fmList = new LinkedList(); 
 	//list used to store AM stations
-	private LinkedList<Station> amList = new LinkedList<Station>();
+	private LinkedList amList = new LinkedList();
 	//constant identifies FM band
 	private final int FM_IDENTIFIER = 0;
 	//constant identifies AM band
 	private final int AM_IDENTIFIER = 1;
-	//comparator to compare the call signs of stations in a list
-	private Comparator<Station> callSignComparator = 
-			(o1, o2) -> o1.getCallSign().compareTo(o2.getCallSign());
-
 	
 	
 	//database constructor from file input
@@ -69,8 +65,8 @@ public class Database implements DatabaseInterface {
 				tempStation.setFormat(stationReader.next());
 			}
 			//sorts lists after adding in all stations
-			fmList.sort(callSignComparator);
-			amList.sort(callSignComparator);
+			fmList.alphabeticalSort();
+			amList.alphabeticalSort();
 		} catch (IllegalArgumentException caughtException){
 			//bad data types
 			System.out.println("Invalid data types in list of stations. Aborting");
@@ -104,76 +100,16 @@ public class Database implements DatabaseInterface {
 		if (band.equalsIgnoreCase("AM")){
 			amList.add(0, tempStation);
 			//sort after adding
-			amList.sort(callSignComparator);
+			amList.alphabeticalSort();
 		//if FM band, add to FM list
 		} 
 		else if (band.equalsIgnoreCase("FM")) {
 			fmList.add(0, tempStation);
 			//sort after adding
-			fmList.sort(callSignComparator);
+			fmList.alphabeticalSort();
 		}
 	}
 	
-	/**************************************************************/ 
-	/* Method: removeStation									  
-	/* Purpose: removes a station from a specified list
-	/* Parameters: 
-	/*		String inputCallSign:		input to search for in the list
-	/* 		String band:				which list station is being removed from
-	/* Returns: none							  
-	/**************************************************************/
-	public void removeStation(String inputCallSign, String band){
-		//scanner for keyboard input
-		Scanner in = new Scanner(System.in);
-		//if AM band, remove from AM list
-		if (band.equalsIgnoreCase("AM")){
-			for (Station current : amList){
-				//call sign of the current station
-				String currentCallSign = current.getCallSign();
-				if (currentCallSign.equalsIgnoreCase(inputCallSign)){
-					System.out.println(current.toString() +
-							"\nDelete this station? y/n");
-					if (in.next().equalsIgnoreCase("y")){
-						//if user confirms deletion
-						amList.remove(current);
-						System.out.println("Station deleted");
-						//sort after removing
-						amList.sort(callSignComparator);
-						return;
-					} else { 
-						//if user does not confirm deletion
-						System.out.println("Deletion aborted.");
-						return;
-					}
-				}
-			}
-		} 
-		//if FM band, remove from FM list
-		else if (band.equalsIgnoreCase("FM")) {
-			for (Station current : fmList){
-				//call sign of the current station
-				String currentCallSign = current.getCallSign();
-				if (currentCallSign.equalsIgnoreCase(inputCallSign)){
-					System.out.println(current.toString() +
-							"\nDelete this station? y/n");
-					if (in.next().equalsIgnoreCase("y")){
-						//if user confirms deletion
-						fmList.remove(current);
-						System.out.println("Station deleted");
-						//sort after removing
-						fmList.sort(callSignComparator);
-						return;
-					} else {
-						//if user does not confirm deletion
-						System.out.println("Deletion aborted.");
-						return;
-					}
-				}
-			}
-		}
-		System.out.println("Station not found.");
-		throw new InputMismatchException();
-	}
 	
 	/**************************************************************/ 
 	/* Method: callSignSearch									  
@@ -186,33 +122,36 @@ public class Database implements DatabaseInterface {
 		//keeps track if a station was found
 		boolean found;
 		//search through both lists, and print the stations that match
-		found = (callSignSearch(inputCallSign, fmList)
-					| callSignSearch(inputCallSign, amList));
+		found = (callSignSearch(inputCallSign, fmList.getHead())
+					| callSignSearch(inputCallSign, amList.getHead()));
 		//if no stations were found, prints message
 		if (!found)
 			System.out.println("No results found.");
 	}
-
+	
 	/**************************************************************/ 
 	/* Method: callSignSearch									  
 	/* Purpose: searches for and prints	stations with the inputed call sign
 	/* Parameters: 
 	/*		String inputCallSign:		input to search for in the list
-	/*		LinkedList currentList:		list to search on
+	/*		Node current:				current Node to search on 
 	/* Returns: boolean:				if a station was found or not							  
 	/**************************************************************/
-	private boolean callSignSearch(String inputCallSign, LinkedList<Station> currentList){
-		//search through all stations
-		for (Station current : currentList){
-			//call sign of the current station
-			String currentStationCallSign = current.getCallSign();
-			//if the call signs match, print and return true
-			if (currentStationCallSign.equals(inputCallSign)){
-				System.out.println(current.toString());
-				return true;
-			}
+	private boolean callSignSearch(String inputCallSign, Node current){
+		//return false if reached the end of the list
+		if (current == null)
+			return false;
+		//current Station being searched
+		Station currentStation = (Station) (current.getDatum());
+		//call sign of current station
+		String currentStationCallSign = currentStation.getCallSign();
+		//compares inputed value with the current value
+		if (currentStationCallSign.equals(inputCallSign)){
+			System.out.println(currentStation.toString());
+			return true;
 		}
-		return false;
+		//otherwise, search the next node
+		return callSignSearch(inputCallSign, current.getNext());
 	}
 	
 	/**************************************************************/ 
@@ -228,11 +167,11 @@ public class Database implements DatabaseInterface {
 		boolean found;
 		//if FM band, check FM list
 		if (band.equalsIgnoreCase("FM")){
-			found = checkCallSignDuplicate(inputCallSign, fmList);
+			found = checkCallSignDuplicate(inputCallSign, fmList.getHead());
 		}
 		//if AM band, check AM list
 		else if (band.equalsIgnoreCase("AM")){
-			found = checkCallSignDuplicate(inputCallSign, amList);
+			found = checkCallSignDuplicate(inputCallSign, amList.getHead());
 		} else {
 			//an illegal band should not reach here,
 			//but just in case, throws an exception
@@ -241,26 +180,29 @@ public class Database implements DatabaseInterface {
 		}
 		return found;
 	}
-
+	
 	/**************************************************************/ 
 	/* Method: checkCallSignDuplicate									  
 	/* Purpose: checks list for inputed call sign
 	/* Parameters: 
 	/*		String inputCallSign:		input to search for in the list
-	/*		LinkedList currentList:		current list being searched
+	/*		Node current:				current Node being searched
 	/* Returns: boolean:				true if there is a duplicate						  
 	/**************************************************************/
-	private boolean checkCallSignDuplicate(String inputCallSign, LinkedList<Station> currentList){
-		//search through all stations
-		for (Station current : currentList){
-			//call sign of the current station
-			String currentStationCallSign = current.getCallSign();
-			//if the call signs match, return true
-			if (currentStationCallSign.equals(inputCallSign)){
-				return true;
-			}
+	private boolean checkCallSignDuplicate(String inputCallSign, Node current){
+		//return false at end of list
+		if (current == null)
+			return false;
+		//current station being searched
+		Station currentStation = (Station) (current.getDatum());
+		//current call sign being checked
+		String currentStationCallSign = currentStation.getCallSign();
+		//if the current call sign matches inputed call sign,  return true
+		if (currentStationCallSign.equals(inputCallSign)){
+			return true;
 		}
-		return false;
+		//otherwise, search the next node
+		return callSignSearch(inputCallSign, current.getNext());
 	}
 	
 	/**************************************************************/ 
@@ -276,11 +218,11 @@ public class Database implements DatabaseInterface {
 		boolean found;
 		//if FM band, search FM list
 		if (band.equals("FM")){
-			found = frequencySearch(inputFrequency, fmList, FM_IDENTIFIER);
+			found = frequencySearch(inputFrequency, fmList.getHead(), FM_IDENTIFIER, false);
 		}
 		//if AM band, search AM list
 		else if (band.equals("AM")){
-			found = frequencySearch(inputFrequency, amList, AM_IDENTIFIER);
+			found = frequencySearch(inputFrequency, amList.getHead(), AM_IDENTIFIER, false);
 		} else {
 			//an illegal band should not reach here,
 			//but just in case, throws an exception
@@ -297,41 +239,41 @@ public class Database implements DatabaseInterface {
 	/* Purpose: searches for an prints the station with matching frequency
 	/* Parameters: 
 	/*		Number inputFrequency:		input to search for in the list
-	/*		List currentList:			list being searched
+	/*		Node current:				node being searched
 	/* 		int band:					which band is being searched
+	/*		boolean found:				if the frequency has been found
 	/* Returns: boolean:				if the frequency is ever found						  
 	/**************************************************************/
-	private boolean frequencySearch(Number inputFrequency, LinkedList<Station> currentList, int band){
-		//keep track if frequency was found
-		boolean found = false;
+	private boolean frequencySearch(Number inputFrequency, Node current, int band, boolean found){
+		//at the end of the list, return found
+		if (current == null)
+			return found;
+		//station being searched
+		Station currentStation = (Station) (current.getDatum());
 		//if FM band, convert Numbers to double
 		if (band == FM_IDENTIFIER){
-			//search through entire list
-			for (Station current : currentList){
-				//frequency being compared
-				double currentFrequency = current.getFrequency().doubleValue();
-				//if current matches input, print station
-				if (currentFrequency == inputFrequency.doubleValue()){
-					System.out.println(current.toString());
-					//set found to true
-					found = true;
-				}
+			//frequency being compared
+			double currentFrequency = currentStation.getFrequency().doubleValue();
+			//if current matches input, print station
+			if (currentFrequency == inputFrequency.doubleValue()){
+				System.out.println(currentStation.toString());
+				//call next node and set found to true
+				found = frequencySearch(inputFrequency, current.getNext(), band, true);
 			}
 		}
 		//if AM band, convert Numbers to int
 		else if (band == AM_IDENTIFIER){
-			//search through entire list
-			for (Station current : currentList){
-				//frequency being compared
-				int currentFrequency = current.getFrequency().intValue();
-				//if current matches input, print station
-				if (currentFrequency == inputFrequency.intValue()){
-					System.out.println(current.toString());
-					//set found to true
-					found = true;
-				}
+			//frequency being compared
+			int currentFrequency = currentStation.getFrequency().intValue();
+			//if current matches input, print station
+			if (currentFrequency == inputFrequency.intValue()){
+				System.out.println(currentStation.toString());
+				//call next node and set found to true
+				found = frequencySearch(inputFrequency, current.getNext(), band, true);
 			}
-		}
+		} else
+			//otherwise, just call the next node and keep found the same
+			found = frequencySearch(inputFrequency, current.getNext(), band, found);
 		return found;
 	}
 	
@@ -346,7 +288,7 @@ public class Database implements DatabaseInterface {
 		//keeps track if format was ever found
 		boolean found = false;
 		//search through both lists
-		found = (formatSearch(inputFormat, fmList) | formatSearch(inputFormat, amList));
+		found = (formatSearch(inputFormat, fmList.getHead(), found) | formatSearch(inputFormat, amList.getHead(), found));
 		//if no stations were found, prints message
 		if (!found)
 			System.out.println("No results found.");
@@ -357,22 +299,27 @@ public class Database implements DatabaseInterface {
 	/* Purpose: searches list for inputed format
 	/* Parameters: 
 	/*		String inputFormat:		input to search for in the list
-	/*		List currentList:		list being searched
+	/*		Node current:			Node being searched
+	/*		boolean found:			if the format has been found
 	/* Returns: boolean:			if the format is ever found						  
 	/**************************************************************/
-	private boolean formatSearch(String inputFormat, LinkedList<Station> currentList){
-		//keeps track if format was found
-		boolean found = false;
-		//search through entire list
-		for (Station current : currentList){
-			//format being searched
-			String currentFormat = current.getFormat();
-			//if current format contains input format, prints station
-			if (currentFormat.toLowerCase().contains(inputFormat.toLowerCase())){
-				System.out.println(current.toString());
-				//call next node and set found to true
-				found = true;
-			}
+	private boolean formatSearch(String inputFormat, Node current, boolean found){
+		//at end of the list, return found
+		if (current == null){
+			return found;
+		}
+		//station being searched
+		Station currentStation = (Station) (current.getDatum());
+		//format being searched
+		String currentStationFormat = currentStation.getFormat();
+		//if current format contains input format, prints station
+		if (currentStationFormat.toLowerCase().contains(inputFormat.toLowerCase())){
+			System.out.println(currentStation.toString());
+			//call next node and set found to true
+			found = formatSearch(inputFormat, current.getNext(), true);
+		} else {
+			//otherwise, just call next node using found's current value
+			found = formatSearch(inputFormat, current.getNext(), found);
 		}
 		return found;
 	}
@@ -389,9 +336,9 @@ public class Database implements DatabaseInterface {
 			System.out.println("No stations in database");
 		else{
 			//prints FM stations
-			System.out.println("FM Stations:\n" + printStations(fmList));
+			System.out.println("FM Stations:\n" + printStations(fmList.getHead()));
 			//prints AM stations
-			System.out.println("AM Stations:\n" + printStations(amList));
+			System.out.println("AM Stations:\n" + printStations(amList.getHead()));
 		}
 	}
 	
@@ -399,16 +346,16 @@ public class Database implements DatabaseInterface {
 	/* Method: printStations								  
 	/* Purpose: returns list of Stations in a list
 	/* Parameters: 
-	/*		List currentList:		current list being turned into a string				  
+	/*		Node current:			current Node added to String				  
 	/* Returns: String:				list of Stations in one list							  
 	/**************************************************************/
-	private String printStations(LinkedList<Station> currentList){
-		//String of all the stations in the list
-		String stationListString = "";
-		//goes through entire list and add the stations to string
-		for (Station current : currentList){
-			stationListString += current.toString() + "\n";
-		}
-		return stationListString;
+	private String printStations(Node current){
+		//return empty at end of list
+		if (current == null)
+			return "";
+		//station being added to String
+		Station currentStation = (Station) (current.getDatum());
+		//return string of current, and the string of the next Node
+		return currentStation.toString() + "\n" + printStations(current.getNext());
 	}
 }
