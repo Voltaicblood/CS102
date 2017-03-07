@@ -2,12 +2,12 @@
 /* Jacob Austin                                                           */
 /* Login ID: aust8558                                                     */ 
 /* CS-102, Winter 2017                                                    */
-/* Programming Assignment 4                                               */
+/* Programming Assignment 3                                               */
 /* Station class: contains objects corresponding to a given radio station */
 /**************************************************************************/
 
 
-public class Station implements Comparable<Station> {
+public class Station {
 
    private String callSign = ""; //call sign of the station
    private String band = ""; //frequency band of station
@@ -96,6 +96,7 @@ public class Station implements Comparable<Station> {
 	/* Parameters: none									  
 	/* Returns: String:		station variables as a String								  
 	/**************************************************************/
+	   
 	public String toString(){
 		String formattedFrequency; //String used to correctly format the frequency
 		if (band.equals("AM")){ //if band is AM, uses integer value
@@ -104,32 +105,6 @@ public class Station implements Comparable<Station> {
 		} else formattedFrequency = Double.toString(frequency.doubleValue());
 		return callSign + ", " +  formattedFrequency + " " + band + ", "
 				+ home + ": " + format;
-	}
-	
-	/**************************************************************/ 
-	/* Method: toStringOrig								  
-	/* Purpose: returns a String listing the variables of the station
-	/* 			in a format based on how they were originally received		  
-	/* Parameters: none									  
-	/* Returns: String:		station variables as a String								  
-	/**************************************************************/
-	public String toStringOrig(){
-		if (band.equalsIgnoreCase("AM"))
-			return callSign + "/" + band + "/" +
-				((int)frequency / 10) + "/" + home + "/" + format + "\r\n";
-		else
-			return callSign + "/" + band + "/" +
-			(int)((double)frequency * 10) + "/" + home + "/" + format +"\r\n";
-	}
-	
-	/**************************************************************/ 
-	/* Method: compareTo									  
-	/* Purpose: compares stations based on call sign	  
-	/* Parameters: Station other:		other station being compared								  
-	/* Returns: int:					based on comparison, 0 if equal							  
-	/**************************************************************/
-	public int compareTo(Station other){
-		return this.callSign.compareTo(other.getCallSign());	
 	}
 
 }

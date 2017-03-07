@@ -2,8 +2,8 @@
 /* Jacob Austin                                                           		   */
 /* Login ID: aust8558                                                     		   */ 
 /* CS-102, Winter 2017                                                    		   */
-/* Programming Assignment 4                                              		   */
-/* Database class: reads and manipulates trees containing station objects           */
+/* Programming Assignment 3                                               		   */
+/* Database class: reads and manipulates a Linked Lists containing station objects */
 /***********************************************************************************/
 
 import java.util.*;
@@ -12,14 +12,18 @@ import java.io.*;
 
 public class Database implements DatabaseInterface {
 	
-	//tree of used to store FM stations
-	private Tree<Station> fmList = new Tree<Station>(); 
-	//tree used to store AM stations
-	private Tree<Station> amList = new Tree<Station>();
+	//list of used to store FM stations
+	private LinkedList<Station> fmList = new LinkedList<Station>(); 
+	//list used to store AM stations
+	private LinkedList<Station> amList = new LinkedList<Station>();
 	//constant identifies FM band
 	private final int FM_IDENTIFIER = 0;
 	//constant identifies AM band
 	private final int AM_IDENTIFIER = 1;
+	//comparator to compare the call signs of stations in a list
+	private Comparator<Station> callSignComparator = 
+			(o1, o2) -> o1.getCallSign().compareTo(o2.getCallSign());
+
 	
 	
 	//database constructor from file input
@@ -49,21 +53,24 @@ public class Database implements DatabaseInterface {
 					throw new IllegalArgumentException();
 				if (!tempBand.equals("AM") && !tempBand.equals("FM"))
 					throw new IllegalArgumentException();
-				//finishes setting variables
-				tempStation.setCallSign(tempCallSign);
-				tempStation.setBand(tempBand);
 				//corrects frequency based on AM or FM
 				if (tempBand.equals("AM")){
 					tempFrequency = stationReader.nextInt() * 10;
-					amList.add(tempStation);
+					amList.add(0 , tempStation);
 				} else {
 					tempFrequency = stationReader.nextDouble() / 10;
-					fmList.add(tempStation);
+					fmList.add(0, tempStation);
 				}
+				//finishes setting rest of variables
+				tempStation.setCallSign(tempCallSign);
+				tempStation.setBand(tempBand);
 				tempStation.setFrequency(tempFrequency);
 				tempStation.setHome(stationReader.next());
 				tempStation.setFormat(stationReader.next());
 			}
+			//sorts lists after adding in all stations
+			fmList.sort(callSignComparator);
+			amList.sort(callSignComparator);
 		} catch (IllegalArgumentException caughtException){
 			//bad data types
 			System.out.println("Invalid data types in list of stations. Aborting");
@@ -80,7 +87,7 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: addStation									  
-	/* Purpose: adds a station to a tree
+	/* Purpose: adds a station to a linked list 
 	/* Parameters: 
 	/*		String callSign:		callSign for new station
 	/* 		String band:			band for new station
@@ -95,27 +102,31 @@ public class Database implements DatabaseInterface {
 		Station tempStation = new Station(callSign, band, frequency, home, format);
 		//if AM band, add to AM list
 		if (band.equalsIgnoreCase("AM")){
-			amList.add(tempStation);
+			amList.add(0, tempStation);
+			//sort after adding
+			amList.sort(callSignComparator);
 		//if FM band, add to FM list
 		} 
 		else if (band.equalsIgnoreCase("FM")) {
-			fmList.add(tempStation);
+			fmList.add(0, tempStation);
+			//sort after adding
+			fmList.sort(callSignComparator);
 		}
 	}
 	
 	/**************************************************************/ 
 	/* Method: removeStation									  
-	/* Purpose: removes a station from a specified tree
+	/* Purpose: removes a station from a specified list
 	/* Parameters: 
-	/*		String inputCallSign:		input to search for in the tree
-	/* 		String band:				which tree station is being removed from
+	/*		String inputCallSign:		input to search for in the list
+	/* 		String band:				which list station is being removed from
 	/* Returns: none							  
 	/**************************************************************/
 	public void removeStation(String inputCallSign, String band){
 		//scanner for keyboard input
 		Scanner in = new Scanner(System.in);
 		//holds list being edited
-		Tree<Station> currentList;
+		LinkedList<Station> currentList;
 		//if AM band, remove from AM list
 		if (band.equalsIgnoreCase("AM"))
 			currentList = amList;
@@ -135,9 +146,13 @@ public class Database implements DatabaseInterface {
 					//if user confirms deletion
 					if (currentList == amList){
 						amList.remove(current);
+						//sort after removing
+						amList.sort(callSignComparator);
 					}
 					else if (currentList == fmList){
 						fmList.remove(current);
+						//sort after removing
+						fmList.sort(callSignComparator);
 					}
 					System.out.println("Station deleted");
 					return;
@@ -154,9 +169,9 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: callSignSearch									  
-	/* Purpose: searches each tree for inputed call sign
+	/* Purpose: searches each list for inputed call sign
 	/* Parameters: 
-	/*		String inputCallSign:		input to search for in the tree
+	/*		String inputCallSign:		input to search for in the list
 	/* Returns: none							  
 	/**************************************************************/
 	public void callSignSearch(String inputCallSign) {
@@ -174,11 +189,11 @@ public class Database implements DatabaseInterface {
 	/* Method: callSignSearch									  
 	/* Purpose: searches for and prints	stations with the inputed call sign
 	/* Parameters: 
-	/*		String inputCallSign:		input to search for in the tree
-	/*		Tree currentList:			tree to search on
+	/*		String inputCallSign:		input to search for in the list
+	/*		LinkedList currentList:		list to search on
 	/* Returns: boolean:				if a station was found or not							  
 	/**************************************************************/
-	private boolean callSignSearch(String inputCallSign, Tree<Station> currentList){
+	private boolean callSignSearch(String inputCallSign, LinkedList<Station> currentList){
 		//search through all stations
 		for (Station current : currentList){
 			//call sign of the current station
@@ -194,9 +209,9 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: checkCallSignDuplicate									  
-	/* Purpose: checks inputed call sign with a certain tree for duplication
+	/* Purpose: checks inputed call sign with a certain list for duplication
 	/* Parameters: 
-	/*		String inputCallSign:		input to search for in the true
+	/*		String inputCallSign:		input to search for in the list
 	/*		String band:				which list to search 
 	/* Returns: boolean:				true if there is a duplicate						  
 	/**************************************************************/
@@ -223,11 +238,11 @@ public class Database implements DatabaseInterface {
 	/* Method: checkCallSignDuplicate									  
 	/* Purpose: checks list for inputed call sign
 	/* Parameters: 
-	/*		String inputCallSign:		input to search for in the tree
-	/*		Tree currentList:			current tree being searched
+	/*		String inputCallSign:		input to search for in the list
+	/*		LinkedList currentList:		current list being searched
 	/* Returns: boolean:				true if there is a duplicate						  
 	/**************************************************************/
-	private boolean checkCallSignDuplicate(String inputCallSign, Tree<Station> currentList){
+	private boolean checkCallSignDuplicate(String inputCallSign, LinkedList<Station> currentList){
 		//search through all stations
 		for (Station current : currentList){
 			//call sign of the current station
@@ -242,10 +257,10 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: frequencySearch								  
-	/* Purpose: searches one of the trees for inputed frequency
+	/* Purpose: searches one of the lists for inputed frequency
 	/* Parameters: 
-	/*		Number inputFrequency:		input to search for in the tree
-	/*		String band:				which tree to search
+	/*		Number inputFrequency:		input to search for in the list
+	/*		String band:				which list to search
 	/* Returns: none						  
 	/**************************************************************/
 	public void frequencySearch(Number inputFrequency, String band) {
@@ -273,12 +288,12 @@ public class Database implements DatabaseInterface {
 	/* Method: frequencySearch								  
 	/* Purpose: searches for an prints the station with matching frequency
 	/* Parameters: 
-	/*		Number inputFrequency:		input to search for in the tree
-	/*		Tree currentList:			tree being searched
+	/*		Number inputFrequency:		input to search for in the list
+	/*		List currentList:			list being searched
 	/* 		int band:					which band is being searched
 	/* Returns: boolean:				if the frequency is ever found						  
 	/**************************************************************/
-	private boolean frequencySearch(Number inputFrequency, Tree<Station> currentList, int band){
+	private boolean frequencySearch(Number inputFrequency, LinkedList<Station> currentList, int band){
 		//keep track if frequency was found
 		boolean found = false;
 		//if FM band, convert Numbers to double
@@ -314,9 +329,9 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: formatSearch								  
-	/* Purpose: searches each tree to for inputed format
+	/* Purpose: searches each list to for inputed format
 	/* Parameters: 
-	/*		String inputFormat:		input to search for in the tree
+	/*		String inputFormat:		input to search for in the list
 	/* Returns: none						  
 	/**************************************************************/
 	public void formatSearch(String inputFormat) {
@@ -331,13 +346,13 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: formatSearch							  
-	/* Purpose: searches tree for inputed format
+	/* Purpose: searches list for inputed format
 	/* Parameters: 
-	/*		String inputFormat:		input to search for in the tree
-	/*		Tree currentList:		tree being searched
+	/*		String inputFormat:		input to search for in the list
+	/*		List currentList:		list being searched
 	/* Returns: boolean:			if the format is ever found						  
 	/**************************************************************/
-	private boolean formatSearch(String inputFormat, Tree<Station> currentList){
+	private boolean formatSearch(String inputFormat, LinkedList<Station> currentList){
 		//keeps track if format was found
 		boolean found = false;
 		//search through entire list
@@ -362,7 +377,7 @@ public class Database implements DatabaseInterface {
 	/**************************************************************/
 	public void printAll() {
 		//if no stations exists, prints message
-		if (amList.isEmpty() && fmList.isEmpty() )
+		if (amList.size() + fmList.size() <= 1)
 			System.out.println("No stations in database");
 		else{
 			//prints FM stations
@@ -374,12 +389,12 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: printStations								  
-	/* Purpose: returns string of Stations in a tree
+	/* Purpose: returns list of Stations in a list
 	/* Parameters: 
-	/*		Tree currentList:		current tree being turned into a string				  
-	/* Returns: String:				tree of Stations in one tree							  
+	/*		List currentList:		current list being turned into a string				  
+	/* Returns: String:				list of Stations in one list							  
 	/**************************************************************/
-	private String printStations(Tree<Station> currentList){
+	private String printStations(LinkedList<Station> currentList){
 		//String of all the stations in the list
 		String stationListString = "";
 		//goes through entire list and add the stations to string
@@ -388,29 +403,4 @@ public class Database implements DatabaseInterface {
 		}
 		return stationListString;
 	}
-	
-	
-	/**************************************************************/ 
-	/* Method: printToDisk								  
-	/* Purpose: writes all the stations to a file 
-	/* Parameters: 
-	/*		String fileName:		which file to write to		  
-	/* Returns: none							  
-	/**************************************************************/
-	public void printToDisk(String fileName){
-		try{
-			BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-			//String made from each list
-			String preOrderedString = amList.preOrderString() + fmList.preOrderString();
-			//Writes to file
-			writer.write(preOrderedString);
-			writer.close();
-			System.out.println("Saved to disk. Returning to menu.");
-		} catch (FileNotFoundException caughtException){
-			System.out.println("File not found at designated location");
-		} catch (IOException caughtException){
-			System.out.println("File can not be accessed.");
-		}
-	}
-	
 }
