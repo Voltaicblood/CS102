@@ -2,7 +2,7 @@
 /* Jacob Austin                                                           
 /* Login ID: aust8558                                                      
 /* CS-102, Winter 2017                                                    
-/* Programming Assignment 5                                            
+/* Programming Assignment 4                                              
 /* BSTIterator class: an iterator for binary search tree
 /**************************************************************************/
 
@@ -10,10 +10,8 @@ import java.util.Iterator;
 import java.util.Stack;
 
 public class BSTIterator<T> implements Iterator<T>{
-	//stack to iterate through
 	Stack<TreeNode<T>> stack;
 	 
-	//constructer using the root of the binary tree
 	public BSTIterator(TreeNode<T> root) {
 		stack = new Stack<TreeNode<T>>();
 		while (root != null) {

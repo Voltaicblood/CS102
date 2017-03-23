@@ -2,13 +2,11 @@
 /* Jacob Austin                                                           		   */
 /* Login ID: aust8558                                                     		   */ 
 /* CS-102, Winter 2017                                                    		   */
-/* Programming Assignment 5                                            		       */
-/* Database class: reads and manipulates trees containing station objects          */
+/* Programming Assignment 4                                              		   */
+/* Database class: reads and manipulates trees containing station objects           */
 /***********************************************************************************/
 
 import java.util.*;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import java.io.*;
 
 
@@ -114,6 +112,8 @@ public class Database implements DatabaseInterface {
 	/* Returns: none							  
 	/**************************************************************/
 	public void removeStation(String inputCallSign, String band){
+		//scanner for keyboard input
+		Scanner in = new Scanner(System.in);
 		//holds list being edited
 		Tree<Station> currentList;
 		//if AM band, remove from AM list
@@ -122,38 +122,36 @@ public class Database implements DatabaseInterface {
 		else if (band.equalsIgnoreCase("FM"))
 			currentList = fmList;
 		else{
-			System.out.println("Incorrect band type reached removeStation method.");
+			System.out.println("Incorrect band type.");
 			throw new InputMismatchException();
 		}
 		for (Station current : currentList){
 			//call sign of the current station
 			String currentCallSign = current.getCallSign();
 			if (currentCallSign.equalsIgnoreCase(inputCallSign)){
-				//shows confirmation dialog
-				int result = JOptionPane.showConfirmDialog(null, current.toString() +
-						"\nDelete this station?", null, JOptionPane.YES_NO_OPTION);
-				if (result == JOptionPane.YES_OPTION){
+				System.out.println(current.toString() +
+						"\nDelete this station? y/n");
+				if (in.next().equalsIgnoreCase("y")){
 					//if user confirms deletion
 					if (currentList == amList){
 						amList.remove(current);
 					}
-					//if user does not want to delete
 					else if (currentList == fmList){
 						fmList.remove(current);
 					}
-					JOptionPane.showMessageDialog(null, "Station deleted");
+					System.out.println("Station deleted");
 					return;
 				} else { 
 					//if user does not confirm deletion
-					JOptionPane.showMessageDialog(null, "Station deletion aborted.");
+					System.out.println("Deletion aborted.");
 					return;
 				}
 			}
 		}
-		JOptionPane.showMessageDialog(null, "Station not found.");
+		System.out.println("Station not found.");
 		throw new InputMismatchException();
 	}
-
+	
 	/**************************************************************/ 
 	/* Method: callSignSearch									  
 	/* Purpose: searches each tree for inputed call sign
@@ -162,47 +160,32 @@ public class Database implements DatabaseInterface {
 	/* Returns: none							  
 	/**************************************************************/
 	public void callSignSearch(String inputCallSign) {
-		//frame to show results of the search
-		DatabaseFrame resultFrame = new DatabaseFrame();
 		//keeps track if a station was found
 		boolean found;
 		//search through both lists, and print the stations that match
-		found = (callSignSearch(inputCallSign, fmList, resultFrame)
-					| callSignSearch(inputCallSign, amList, resultFrame));
+		found = (callSignSearch(inputCallSign, fmList)
+					| callSignSearch(inputCallSign, amList));
 		//if no stations were found, prints message
-		if (!found){
-			JOptionPane.showMessageDialog(null, "No results found.");
-			//removes the frame that isn't being used
-			resultFrame.frame.dispose();
-		}
-		else {
-			//set the frame to be visible if any results were found
-			resultFrame.frame.setVisible(true);
-		}
+		if (!found)
+			System.out.println("No results found.");
 	}
-	
+
 	/**************************************************************/ 
 	/* Method: callSignSearch									  
 	/* Purpose: searches for and prints	stations with the inputed call sign
 	/* Parameters: 
 	/*		String inputCallSign:		input to search for in the tree
 	/*		Tree currentList:			tree to search on
-	/* 		DatabaseFrame resultFrame:	frame to put results on
 	/* Returns: boolean:				if a station was found or not							  
 	/**************************************************************/
-	private boolean callSignSearch(String inputCallSign, Tree<Station> currentList,
-									DatabaseFrame resultFrame){
+	private boolean callSignSearch(String inputCallSign, Tree<Station> currentList){
 		//search through all stations
 		for (Station current : currentList){
 			//call sign of the current station
 			String currentStationCallSign = current.getCallSign();
 			//if the call signs match, print and return true
 			if (currentStationCallSign.equals(inputCallSign)){
-				//add the station to the results frame if it was found
-				if (currentList == fmList)
-					resultFrame.FMPanel.add(new JLabel(current.toString()));
-				else
-					resultFrame.AMPanel.add(new JLabel(current.toString()));
+				System.out.println(current.toString());
 				return true;
 			}
 		}
@@ -266,33 +249,24 @@ public class Database implements DatabaseInterface {
 	/* Returns: none						  
 	/**************************************************************/
 	public void frequencySearch(Number inputFrequency, String band) {
-		//frame to print results to
-		DatabaseFrame resultFrame = new DatabaseFrame();
 		//keeps track if the frequency was found
 		boolean found;
 		//if FM band, search FM list
 		if (band.equals("FM")){
-			found = frequencySearch(inputFrequency, fmList, FM_IDENTIFIER, resultFrame);
+			found = frequencySearch(inputFrequency, fmList, FM_IDENTIFIER);
 		}
 		//if AM band, search AM list
 		else if (band.equals("AM")){
-			found = frequencySearch(inputFrequency, amList, AM_IDENTIFIER, resultFrame);
+			found = frequencySearch(inputFrequency, amList, AM_IDENTIFIER);
 		} else {
 			//an illegal band should not reach here,
 			//but just in case, throws an exception
 			System.out.print("Illegal band name reached frequency search method.");
 			throw new InputMismatchException();
 		}
-		//if no stations were found, shows message
-		if (!found){
-			JOptionPane.showMessageDialog(null, "No results found.");
-			//removes the frame that isn't being used
-			resultFrame.frame.dispose();
-		}
-		else {
-			//sets the frame as visible if results were found
-			resultFrame.frame.setVisible(true);
-		}
+		//if no stations were found, prints message
+		if (!found)
+			System.out.println("No results found.");
 	}
 	
 	/**************************************************************/ 
@@ -302,11 +276,9 @@ public class Database implements DatabaseInterface {
 	/*		Number inputFrequency:		input to search for in the tree
 	/*		Tree currentList:			tree being searched
 	/* 		int band:					which band is being searched
-	/* 		DatabaseFrame resultFrame:	frame which results are posted on
 	/* Returns: boolean:				if the frequency is ever found						  
 	/**************************************************************/
-	private boolean frequencySearch(Number inputFrequency, Tree<Station> currentList, int band,
-									DatabaseFrame resultFrame){
+	private boolean frequencySearch(Number inputFrequency, Tree<Station> currentList, int band){
 		//keep track if frequency was found
 		boolean found = false;
 		//if FM band, convert Numbers to double
@@ -315,11 +287,9 @@ public class Database implements DatabaseInterface {
 			for (Station current : currentList){
 				//frequency being compared
 				double currentFrequency = current.getFrequency().doubleValue();
-				//if current matches input, add to results
+				//if current matches input, print station
 				if (currentFrequency == inputFrequency.doubleValue()){
-					resultFrame.FMPanel.add(new JLabel(current.toString()));
-					//removes other tab that will have no results
-					resultFrame.tabs.removeTabAt(1);
+					System.out.println(current.toString());
 					//set found to true
 					found = true;
 				}
@@ -331,11 +301,9 @@ public class Database implements DatabaseInterface {
 			for (Station current : currentList){
 				//frequency being compared
 				int currentFrequency = current.getFrequency().intValue();
-				//if current matches input, add to results
+				//if current matches input, print station
 				if (currentFrequency == inputFrequency.intValue()){
-					resultFrame.AMPanel.add(new JLabel(current.toString()));
-					//removes other tab that will have no results
-					resultFrame.tabs.removeTabAt(0);
+					System.out.println(current.toString());
 					//set found to true
 					found = true;
 				}
@@ -343,7 +311,7 @@ public class Database implements DatabaseInterface {
 		}
 		return found;
 	}
-
+	
 	/**************************************************************/ 
 	/* Method: formatSearch								  
 	/* Purpose: searches each tree to for inputed format
@@ -352,48 +320,33 @@ public class Database implements DatabaseInterface {
 	/* Returns: none						  
 	/**************************************************************/
 	public void formatSearch(String inputFormat) {
-		//frame to put results on
-		DatabaseFrame resultFrame = new DatabaseFrame();
 		//keeps track if format was ever found
 		boolean found = false;
 		//search through both lists
-		found = (formatSearch(inputFormat, fmList, resultFrame) |
-				formatSearch(inputFormat, amList, resultFrame));
+		found = (formatSearch(inputFormat, fmList) | formatSearch(inputFormat, amList));
 		//if no stations were found, prints message
-		if (!found){
-			JOptionPane.showMessageDialog(null, "No results found.");
-			//removes the frame that isn't being used
-			resultFrame.frame.dispose();
-		}
-		else {
-			//if a result is found, sets the results frame to visible
-			resultFrame.frame.setVisible(true);
-		}
+		if (!found)
+			System.out.println("No results found.");
 	}
 	
 	/**************************************************************/ 
 	/* Method: formatSearch							  
 	/* Purpose: searches tree for inputed format
 	/* Parameters: 
-	/*		String inputFormat:			input to search for in the tree
-	/*		Tree currentList:			tree being searched
-	/* 		DatabaseFrame resultFrame:	frame to print results to
-	/* Returns: boolean:				if the format is ever found						  
+	/*		String inputFormat:		input to search for in the tree
+	/*		Tree currentList:		tree being searched
+	/* Returns: boolean:			if the format is ever found						  
 	/**************************************************************/
-	private boolean formatSearch(String inputFormat, Tree<Station> currentList,
-									DatabaseFrame resultFrame){
+	private boolean formatSearch(String inputFormat, Tree<Station> currentList){
 		//keeps track if format was found
 		boolean found = false;
 		//search through entire list
 		for (Station current : currentList){
 			//format being searched
 			String currentFormat = current.getFormat();
-			//if current format contains input format, add station to results
+			//if current format contains input format, prints station
 			if (currentFormat.toLowerCase().contains(inputFormat.toLowerCase())){
-				if(currentList == fmList)
-					resultFrame.FMPanel.add(new JLabel(current.toString()));
-				else
-					resultFrame.AMPanel.add(new JLabel(current.toString()));
+				System.out.println(current.toString());
 				//call next node and set found to true
 				found = true;
 			}
@@ -403,46 +356,39 @@ public class Database implements DatabaseInterface {
 	
 	/**************************************************************/ 
 	/* Method: printAll									  
-	/* Purpose: lists all of the stations in the database
+	/* Purpose: prints all of the stations in the database
 	/* Parameters: none							  
 	/* Returns: none							  
 	/**************************************************************/
 	public void printAll() {
-		DatabaseFrame resultFrame = new DatabaseFrame();
-		//if no stations exists, display message
+		//if no stations exists, prints message
 		if (amList.isEmpty() && fmList.isEmpty() )
-			JOptionPane.showMessageDialog(null, "No stations in database");
+			System.out.println("No stations in database");
 		else{
 			//prints FM stations
-			printStations(fmList, FM_IDENTIFIER, resultFrame);
+			System.out.println("FM Stations:\n" + printStations(fmList));
 			//prints AM stations
-			printStations(amList, AM_IDENTIFIER, resultFrame);
-			//show results frame
-			resultFrame.frame.setVisible(true);
+			System.out.println("AM Stations:\n" + printStations(amList));
 		}
 	}
+	
 	/**************************************************************/ 
 	/* Method: printStations								  
 	/* Purpose: returns string of Stations in a tree
 	/* Parameters: 
-	/*		Tree currentList:			current tree being turned into a string
-	/* 		DatabaseFrame resultFrame:	frame to print results to			  
-	/* Returns: String:					tree of Stations in one tree							  
+	/*		Tree currentList:		current tree being turned into a string				  
+	/* Returns: String:				tree of Stations in one tree							  
 	/**************************************************************/
-	private void printStations(Tree<Station> currentList, int identifier,
-									DatabaseFrame resultFrame){
+	private String printStations(Tree<Station> currentList){
+		//String of all the stations in the list
+		String stationListString = "";
 		//goes through entire list and add the stations to string
-		if(identifier == FM_IDENTIFIER){
-			for (Station current : currentList)
-				//adds the stations from the fm list to the fm panel
-				resultFrame.FMPanel.add(new JLabel(current.toString()));
+		for (Station current : currentList){
+			stationListString += current.toString() + "\n";
 		}
-		else{
-			for (Station current : currentList)
-				//adds the stations from the am list to the am panel
-				resultFrame.AMPanel.add(new JLabel(current.toString()));
-		}
+		return stationListString;
 	}
+	
 	
 	/**************************************************************/ 
 	/* Method: printToDisk								  
@@ -453,21 +399,17 @@ public class Database implements DatabaseInterface {
 	/**************************************************************/
 	public void printToDisk(String fileName){
 		try{
-			//writer to print to disk
 			BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 			//String made from each list
 			String preOrderedString = amList.preOrderString() + fmList.preOrderString();
 			//Writes to file
 			writer.write(preOrderedString);
 			writer.close();
-			//confirms database has been saved
-			JOptionPane.showMessageDialog(null, "Database saved to disk.");
+			System.out.println("Saved to disk. Returning to menu.");
 		} catch (FileNotFoundException caughtException){
-			//if filename is incorrect
-			JOptionPane.showMessageDialog(null, "File not found at designated location");
+			System.out.println("File not found at designated location");
 		} catch (IOException caughtException){
-			//if nothing is entered or dialog is canceled
-			JOptionPane.showMessageDialog(null, "File can not be accessed.");
+			System.out.println("File can not be accessed.");
 		}
 	}
 	

@@ -5,3 +5,4 @@ WUOM/FM/911/Flint/national public radio, talk
 WUGN/FM/997/Midland/religious
 WKCQ/FM/981/Saginaw/country
 WJR/FM/764/Chicago/hip-hop
+WKLU/FM/925/Chicago/talk, sports, juicy j

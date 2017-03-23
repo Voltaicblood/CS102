@@ -2,7 +2,7 @@
 /* Jacob Austin                                                          
 /* Login ID: aust8558                                                     
 /* CS-102, Winter 2017                                                    
-/* Programming Assignment 5                                                  
+/* Programming Assignment 4                                                  
 /* TreeNode class: holds an object and points to it's children in a tree
 /******************************************************************************/
 
